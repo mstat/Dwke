@@ -1,0 +1,80 @@
+<HTML XMLNS:IE>
+　　<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+　　<IE:Download ID="include" STYLE="behavior:url(#default#download)" />
+　　<title>Chromeless Window</title>
+　　<SCRIPT LANGUAGE="JScript">
+　　var CW_width = 400;
+　　var CW_height = 300;
+　　var CW_top = 100;
+　　var CW_left = 100;
+　　var CW_url = "/";
+　　var New_CW = window.createPopup();
+　　var CW_Body = New_CW.document.body;
+　　var content = "";
+　　var CSStext = "margin:1px;color:black; border:2px outset;border-style:expression(onmouseout=onmouseup=function(){this.style.borderStyle='outset'}, onmousedown=function(){if(event.button!=2)this.style.borderStyle='inset'});background-color:buttonface;width:16px;height:14px;font-size:12px;line-height:11px;cursor:Default;";
+　　//Build Window
+　　include.startDownload(CW_url, function(source){content=source});
+　　function insert_content(){
+　　var temp = "";
+　　CW_Body.style.overflow = "hidden";
+　　CW_Body.style.backgroundColor = "white";
+　　CW_Body.style.border = "solid black 1px";
+　　content = content.replace(/<a ([^>]*)>/g,"<a onclick='parent.open(this.href);return false' $1>");
+　　temp += "<table width=100% height=100% cellpadding=0 cellspacing=0 border=0 style='filter: Alpha(Opacity=30)'>";
+　　temp += "<tr style=';font-size:12px;background:#0099CC;height:20;cursor:default' ondblclick=\"Max.innerText=Max.innerText=='1'?'2':'1';parent.if_max=!parent.if_max;parent.show_CW();\" onmouseup='parent.drag_up(event)' onmousemove='parent.drag_move(event)' onmousedown='parent.drag_down(event)' onselectstart='return false' oncontextmenu='return false'>";
+　　temp += "<td style='color:#ffffff;padding-left:5px'>Chromeless Window For IE6 SP1</td>";
+　　temp += "<td style='color:#ffffff;padding-right:5px;' align=right>";
+　　temp += "<span id=Help onclick=\"alert('Chromeless Window For IE6 SP1 - Ver 1.0\\n\\nCode By Windy_sk\\n\\nSpecial Thanks For andot')\" style=\""+CSStext+"font-family:System;padding-right:2px;\">?</span>";
+　　temp += "<span id=Min onclick='parent.New_CW.hide();parent.blur()' style=\""+CSStext+"font-family:Webdings;\" title='Minimum'>0</span>";
+　　temp += "<span id=Max onclick=\"this.innerText=this.innerText=='1'?'2':'1';parent.if_max=!parent.if_max;parent.show_CW();\" style=\""+CSStext+"font-family:Webdings;\" title='Maximum'>1</span>";
+　　temp += "<span id=Close onclick='parent.opener=null;parent.close()' style=\""+CSStext+"font-family:System;padding-right:2px;\" title='Close'>x</span>";
+　　temp += "</td></tr><tr><td colspan=2>";
+　　temp += "<div id=include style='overflow:scroll;overflow-x:hidden;overflow-y:auto; HEIGHT: 100%; width:"+CW_width+"'>";
+　　temp += content;
+　　temp += "</div>";
+　　temp += "</td></tr></table>";
+　　CW_Body.innerHTML = temp;
+　　}
+　　setTimeout("insert_content()",1000);
+　　var if_max = true;
+　　function show_CW(){
+　　window.moveTo(10000, 10000);
+　　if(if_max){
+　　 New_CW.show(CW_top, CW_left, CW_width, CW_height);
+　　 if(typeof(New_CW.document.all.include)!="undefined"){
+　　 New_CW.document.all.include.style.width = CW_width;
+　　 New_CW.document.all.Max.innerText = "1";
+　　 }
+　　 
+　　}else{
+　　 New_CW.show(0, 0, screen.width, screen.height);
+　　 New_CW.document.all.include.style.width = screen.width;
+　　}
+　　}
+　　window.onfocus = show_CW;
+　　window.onresize = show_CW;
+　　// Move Window
+　　var drag_x,drag_y,draging=false
+　　function drag_move(e){
+　　if (draging){
+　　 New_CW.show(e.screenX-drag_x, e.screenY-drag_y, CW_width, CW_height);
+　　 return false;
+　　}
+　　}
+　　function drag_down(e){
+　　if(e.button==2)return;
+　　if(New_CW.document.body.offsetWidth==screen.width && New_CW.document.body.offsetHeight==screen.height)return;
+　　drag_x=e.clientX;
+　　drag_y=e.clientY;
+　　draging=true;
+　　e.srcElement.setCapture();
+　　}
+　　function drag_up(e){
+　　draging=false;
+　　e.srcElement.releaseCapture();
+　　if(New_CW.document.body.offsetWidth==screen.width && New_CW.document.body.offsetHeight==screen.height) return;
+　　CW_top = e.screenX-drag_x;
+　　CW_left = e.screenY-drag_y;
+　　}
+　　</SCRIPT>
+　　</HTML>
