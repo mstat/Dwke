@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 801
-  Top = 164
+  Left = 724
+  Top = 135
   Width = 461
   Height = 534
   Caption = 'Form1'
@@ -55,9 +55,9 @@ object Form1: TForm1
   end
   object scrlbx1: TScrollBox
     Left = 8
-    Top = 192
+    Top = 304
     Width = 425
-    Height = 297
+    Height = 185
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 4
     object img1: TImage
@@ -193,6 +193,50 @@ object Form1: TForm1
     TabOrder = 15
     OnClick = CheckBox1Click
   end
+  object Button7: TButton
+    Left = 16
+    Top = 200
+    Width = 75
+    Height = 25
+    Caption = 'malert(string)'
+    TabOrder = 16
+    OnClick = Button7Click
+  end
+  object Edit1: TEdit
+    Left = 16
+    Top = 240
+    Width = 417
+    Height = 21
+    TabOrder = 17
+    Text = 'nalert(document.body.innerHTML);'
+  end
+  object Button8: TButton
+    Left = 168
+    Top = 272
+    Width = 75
+    Height = 25
+    Caption = 'RunJs'
+    TabOrder = 18
+    OnClick = Button8Click
+  end
+  object Button9: TButton
+    Left = 112
+    Top = 200
+    Width = 75
+    Height = 25
+    Caption = 'nalert()'
+    TabOrder = 19
+    OnClick = Button9Click
+  end
+  object Button10: TButton
+    Left = 360
+    Top = 144
+    Width = 75
+    Height = 41
+    Caption = 'MacOS'
+    TabOrder = 20
+    OnClick = Button10Click
+  end
   object tmr1: TTimer
     Enabled = False
     OnTimer = tmr1Timer
@@ -201,9 +245,16 @@ object Form1: TForm1
   end
   object tmr2: TTimer
     Enabled = False
-    Interval = 50
+    Interval = 10
     OnTimer = tmr2Timer
     Left = 224
     Top = 152
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = Timer1Timer
+    Left = 224
+    Top = 192
   end
 end

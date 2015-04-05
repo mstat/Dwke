@@ -31,6 +31,12 @@ type
     Button5: TButton;
     Button6: TButton;
     CheckBox1: TCheckBox;
+    Button7: TButton;
+    Edit1: TEdit;
+    Button8: TButton;
+    Button9: TButton;
+    Button10: TButton;
+    Timer1: TTimer;
     procedure btn1Click(Sender: TObject);
     procedure tmr1Timer(Sender: TObject);
     procedure btn2Click(Sender: TObject);
@@ -48,6 +54,11 @@ type
     procedure Button6Click(Sender: TObject);
     procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
     procedure CheckBox1Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Private declarations }
   public
@@ -56,10 +67,12 @@ type
     DocumentNotReady: Boolean;  
     webView: wkeWebView;
     LayoutThread:TLayoutThread;
+    s_testCount:integer;
   end;
   
 var
   Form1: TForm1;
+  canclose:boolean;
   
 implementation
 
@@ -169,15 +182,22 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   //Set8087CW(Get8087CW or $3F);
+  canclose:=false;
+  wke_Init();       
   mmo1.Lines.Add(string(wkeVersionString()));
-  wke_Init();
+  Button7Click(Sender);
+  Button9Click(Sender);
   webView := wkeCreateWebView();
   wkeResize(webView, Screen.Width, Screen.Height);
   if wkeIsTransparent(webView) then
     mmo1.Lines.Add('Is Transparent')
   else
     mmo1.Lines.Add('Is Not Transparent');
-  wkeSetTransparent(webView,true);
+  wkeSetTransparent(webView,true); 
+  if wkeIsTransparent(webView) then
+    mmo1.Lines.Add('Set Transparent ok')
+  else
+    mmo1.Lines.Add('Set Transparent faled');
 end;
 
 procedure TForm1.btn3Click(Sender: TObject);
@@ -267,6 +287,7 @@ begin
   //if (wkeIsDirty(webView)) then
   //begin
     pic:=wkeGetBitmap(webView,0);
+    pic.SaveToFile('test.bmp');
     img1.Picture.Bitmap:=pic;
     //AlphaUpdateLayeredWindow(Form2.Handle, pic, 255);
     pic.Free;   
@@ -277,10 +298,12 @@ procedure TForm1.Button1Click(Sender: TObject);
 var
   url:Putf8;
 begin
-  edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/index.html';
+  //edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/index.html';
+  edt1.Text:='www/index.html';
   url:=Putf8(edt1.Text);
   mmo1.Lines.Add('Load:'+edt1.Text);
-  wkeLoadURL(webView,url);
+  //wkeLoadURL(webView,url);
+  wkeLoadFile(webView,url);
   tmr1.Enabled:=True;
   DocumentNotReady:=True;
 end;
@@ -289,10 +312,12 @@ procedure TForm1.Button2Click(Sender: TObject);
 var
   url:Putf8;
 begin
-  edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/flash.html';
+  //edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/flash.html';
+  edt1.Text:='www/flash.html';
   url:=Putf8(edt1.Text);
   mmo1.Lines.Add('Load:'+edt1.Text);
-  wkeLoadURL(webView,url);
+  //wkeLoadURL(webView,url);
+  wkeLoadFile(webView,url);
   tmr1.Enabled:=True;
   DocumentNotReady:=True;
 end;
@@ -301,10 +326,12 @@ procedure TForm1.Button3Click(Sender: TObject);
 var
   url:Putf8;
 begin
-  edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/2048-master/index.html';
+  //edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/2048-master/index.html';
+  edt1.Text:='www/2048-master/index.html';
   url:=Putf8(edt1.Text);
   mmo1.Lines.Add('Load:'+edt1.Text);
-  wkeLoadURL(webView,url);
+  //wkeLoadURL(webView,url);
+  wkeLoadFile(webView,url);
   tmr1.Enabled:=True;
   DocumentNotReady:=True;
 end;
@@ -313,10 +340,12 @@ procedure TForm1.Button4Click(Sender: TObject);
 var
   url:Putf8;
 begin
-  edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/Ball Pool.htm';
+  //edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/Ball Pool.htm';
+  edt1.Text:='www/Ball Pool.htm';
   url:=Putf8(edt1.Text);
   mmo1.Lines.Add('Load:'+edt1.Text);
-  wkeLoadURL(webView,url);
+  //wkeLoadURL(webView,url);
+  wkeLoadFile(webView,url);
   tmr1.Enabled:=True;
   DocumentNotReady:=True;
 end;
@@ -325,10 +354,12 @@ procedure TForm1.Button5Click(Sender: TObject);
 var
   url:Putf8;
 begin
-  edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/card.html';
+  //edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/card.html';
+  edt1.Text:='www/card.html';
   url:=Putf8(edt1.Text);
   mmo1.Lines.Add('Load:'+edt1.Text);
-  wkeLoadURL(webView,url);
+  //wkeLoadURL(webView,url);
+  wkeLoadFile(webView,url);
   tmr1.Enabled:=True;
   DocumentNotReady:=True;
 end;
@@ -338,9 +369,11 @@ var
   url:Putf8;
 begin
   edt1.Text:='file:///'+ExtractFileDir(Application.Exename)+'/www/CSS Bubbles.html';
+  edt1.Text:='www/CSS Bubbles.html';
   url:=Putf8(edt1.Text);
   mmo1.Lines.Add('Load:'+edt1.Text);
-  wkeLoadURL(webView,url);
+  //wkeLoadURL(webView,url);
+  wkeLoadFile(webView,url);
   tmr1.Enabled:=True;
   DocumentNotReady:=True;
 end;
@@ -348,6 +381,81 @@ end;
 procedure TForm1.CheckBox1Click(Sender: TObject);
 begin
   wkeSetEditable(webView,CheckBox1.Checked);
+end;
+
+procedure TForm1.Button8Click(Sender: TObject);
+var
+  jsRet:jsValue;
+begin
+  jsRet:=wkeRunJS(webView,PAnsiChar(edit1.text));
+  mmo1.Lines.Add('jsRun:'+string(jsToStringW(wkeGlobalExec(webView),jsRet)));
+end;          
+
+function js_getTestCount(es:jsExecState):jsValue;
+begin
+    result:=jsInt(form1.s_testCount);
+end;
+
+function js_setTestCount(es:jsExecState):jsValue;
+begin
+  form1.s_testCount := jsToInt(es, jsArg(es, 0));
+  form1.mmo1.Lines.Add('js_setTestCount:'+inttostr(form1.s_testCount));
+  result:=jsUndefined();
+end;
+
+function js_malert(es:jsExecState):jsValue;//cdecl;
+var
+  str:Putf8;
+begin
+  str:=jsToString(es, jsArg(es, 0));
+  if(jsIsString(jsArg(es, 0))) then
+    Form1.mmo1.Lines.Add('malert:jsIsString');
+  if(jsIsUndefined(jsArg(es, 0))) then
+    Form1.mmo1.Lines.Add('malert:jsIsUndefined');
+  Form1.mmo1.Lines.Add('malert:'+string(str)+'('+inttostr(jsArgCount(es))+')');
+  result:=jsUndefined();
+end;   
+
+procedure TForm1.Button7Click(Sender: TObject);
+begin
+  jsBindFunction(Pchar('malert'), @js_malert,1);
+  Button7.Enabled:=false;
+  jsBindGetter('testCount', @js_getTestCount);
+  jsBindSetter('testCount', @js_setTestCount);
+  //FreeMem(p);
+end;
+
+function js_nalert(es:jsExecState):jsValue;//cdecl;
+begin
+  Form1.mmo1.Lines.Add('nalert:ok('+inttostr(jsArgCount(es))+')');
+  result:=jsUndefined();
+  if canclose then
+    Application.Terminate;
+end;
+
+procedure TForm1.Button9Click(Sender: TObject);
+begin
+  jsBindFunction(Pchar('nalert'), @js_nalert,0);
+  Button9.Enabled:=false;
+  //FreeMem(p);
+end;
+
+procedure TForm1.Button10Click(Sender: TObject);
+begin
+  Timer1.Enabled:=true;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+  form1.Hide;
+  wkeLoadFile(webView,'www/MAC/mac-osx-lion.html');
+  tmr1.Enabled:=True;
+  DocumentNotReady:=True;
+  form1.Left:=-100;
+  Form1.Width:=0;
+  Form1.Height:=0;
+  canclose:=true;
+  Timer1.Enabled:=false;
 end;
 
 end.

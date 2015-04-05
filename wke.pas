@@ -3,7 +3,7 @@ unit wke;
 interface
 
 uses
-  Windows, Graphics;
+  Windows, Graphics, Dialogs;
 
 type
   wkeWebView = Pointer;
@@ -12,7 +12,10 @@ type
   utf8 = Char;
   Putf8 = PChar;
   PWutf8 = PWChar;
-  jsValue = Int64;
+  jsValue = Int64;//UInt64;//
+  PjsValue = ^Int64;//UInt64;//
+  wkeuint = ^Word;
+  wkeint = ^integer;
   jsType = ( JSTYPE_NUMBER,
              JSTYPE_STRING,
 	           JSTYPE_BOOLEAN,
@@ -25,10 +28,6 @@ type
     onURLChanged: Pointer;   //ON_URL_CHANGED
   end;
   PwkeClientHandler=^_wkeClientHandler;
-  
-  ON_TITLE_CHANGED = procedure(clientHandler: PwkeClientHandler;title: wkeString);
-  ON_URL_CHANGED   = procedure(clientHandler: PwkeClientHandler;url: wkeString );
-  jsNativeFunction = function(es:jsExecState):jsValue;
 
   wkeRect = record
     x: Integer;
@@ -36,92 +35,142 @@ type
     w: Integer;
     h: Integer;
   end;
-  
+
+  ON_TITLE_CHANGED = procedure(clientHandler: PwkeClientHandler;title: wkeString); cdecl;
+  ON_URL_CHANGED   = procedure(clientHandler: PwkeClientHandler;url: wkeString ); cdecl;
+  //jsNativeFunction = function(es:jsExecState):jsValue of Object;
+  jsNativeFunction = function(es:jsExecState):jsValue; cdecl;
+  PjsNativeFunction = ^jsNativeFunction;
+  //jsNativeFunction = Pointer;
   
   {TwkeClientHandler = record
     name:string;
     id:string;
   end;}
+ 
+  TwkeIsTransparent = function(browser: wkeWebView):Boolean;cdecl;
+  TwkeSetTransparent = procedure(browser: wkeWebView;transparent: Boolean);cdecl;
+  TwkeInit = procedure();cdecl;
+  TwkeCreateWebView = function(): wkeWebView;cdecl;
+  TwkeResize = procedure(webView: wkeWebView;w,h: Integer);cdecl;
 
+  TwkeLoadURL = procedure(webView: wkeWebView;const url: Putf8);cdecl;
+  TwkeLoadURLW = procedure(webView: wkeWebView;const url: PWutf8);cdecl;
+
+  TwkeLoadHTML = procedure(webView: wkeWebView;const html: Putf8);cdecl;
+  TwkeLoadHTMLW = procedure(webView: wkeWebView;const html: PWutf8);cdecl;
+
+  TwkeLoadFile = procedure(webView: wkeWebView;const filename: Putf8);cdecl;
+  TwkeLoadFileW = procedure(webView: wkeWebView;const filename: PWutf8);cdecl;
+
+  TwkeUpdate = procedure();cdecl;
+  TwkeVersionString = function():Putf8;cdecl;
+  TwkeIsLoaded = function(webView: wkeWebView):Boolean;cdecl;
+  // = functionwkeIsLoading(webView: wkeWebView):Boolean;cdecl;
+  TwkeIsDocumentReady = function(webView: wkeWebView):Boolean;cdecl;
+  TwkeIsLoadComplete = function(webView: wkeWebView):Boolean;cdecl;
+  TwkeIsLoadFailed = function(webView: wkeWebView):Boolean;cdecl;
+  TwkeRunJS = function(webView: wkeWebView;script: Putf8):jsValue;cdecl;
+  TwkeRunJSW = function(webView: wkeWebView;script: PWutf8):jsValue;cdecl;
+  TwkeContentsWidth = function(webView: wkeWebView):Integer;cdecl;
+  TwkeContentsHeight = function(webView: wkeWebView):Integer;cdecl;
+  TwkeWidth = function(webView: wkeWebView):Integer;cdecl;
+  TwkeHeight = function(webView: wkeWebView):Integer;cdecl;
+  TwkeTitleW = function(webView: wkeWebView):PWutf8;cdecl;
+  TwkePaint = procedure(wkeWebView: wkeWebView;bits: Pointer;pitch: Integer);cdecl;
+  TwkeIsDirty = function(webView: wkeWebView):Boolean;cdecl;
+  TwkeFocus = procedure(webView: wkeWebView);cdecl;
+  TwkeUnfocus = procedure(webView: wkeWebView);cdecl;
+  
+  TwkeMouseEvent = function(webView: wkeWebView;msg: LongWord;x,y:Integer;flags: LongWord):Boolean;cdecl;
+  TwkeContextMenuEvent = function(webView: wkeWebView;x,y:Integer;flags: LongWord):Boolean;cdecl;
+  TwkeMouseWheel = function(webView: wkeWebView;x,y:Integer;msg: Integer;flags: LongWord):Boolean;cdecl;
+
+  TwkeKeyUp = function(webView: wkeWebView;virtualKeyCode: LongWord;flags: Word;systemKey: Boolean):Boolean;cdecl;
+  TwkeKeyDown = function(webView: wkeWebView;virtualKeyCode: LongWord;flags: Word;systemKey: Boolean):Boolean;cdecl;
+  TwkeKeyPress = function(webView: wkeWebView;charCode: LongWord;flags: Word;systemKey: Boolean):Boolean;cdecl;
+
+  TwkeGetCaret = function(webView: wkeWebView):wkeRect;cdecl;
+  TwkeSetEditable = procedure(webView: wkeWebView;editable:Boolean);cdecl;
+
+  TwkeGlobalExec = function(webView: wkeWebView):jsExecState;cdecl;
+  TwkeToString = function(str : wkeString):Putf8;cdecl;
+
+  TjsBindFunction = procedure(const name:PAnsiChar;fn:jsNativeFunction;argCount:Cardinal);cdecl;
+  TjsBindGetter = procedure(const name:PAnsiChar;fn:jsNativeFunction);cdecl;
+  TjsBindSetter = procedure(const name:PAnsiChar;fn:jsNativeFunction);cdecl;
+  TjsArgCount = function(es:jsExecState):Integer;cdecl;
+  TjsArgType = function(es:jsExecState;argIdx:Integer):jsType;cdecl;
+  TjsArg = function(es:jsExecState;argIdx:Integer):jsValue;cdecl;
+
+  TjsTypeOf = function(v:jsValue):jsType;cdecl;
+  TjsIsNumber = function(v:jsValue):boolean;cdecl;
+  TjsIsString = function(v:jsValue):boolean;cdecl;
+  TjsIsBoolean = function(v:jsValue):boolean;cdecl;
+  TjsIsObject = function(v:jsValue):boolean;cdecl;
+  TjsIsfunction= function(v:jsValue):boolean;cdecl;
+  TjsIsUndefined = function(v:jsValue):boolean;cdecl;
+  TjsIsNull = function(v:jsValue):boolean;cdecl;
+  TjsIsArray = function(v:jsValue):boolean;cdecl;
+  TjsIsTrue = function(v:jsValue):boolean;cdecl;
+  TjsIsFalse = function(v:jsValue):boolean;cdecl;
+
+  TjsToInt = function(es:jsExecState;v:jsValue):integer;cdecl;
+  TjsToFloat = function(es:jsExecState;v:jsValue):Single;cdecl;
+  TjsToDouble = function(es:jsExecState;v:jsValue):Double;cdecl;
+  TjsToBoolean = function(es:jsExecState;v:jsValue):boolean;cdecl;
+  TjsToString = function(es:jsExecState;v:jsValue):Putf8;cdecl;
+  TjsToStringW = function(es:jsExecState;v:jsValue):PWutf8;cdecl;
+
+  TjsInt = function(n:integer):jsValue;cdecl;
+  TjsFloat = function(f:Single):jsValue;cdecl;
+  TjsDouble = function(d:Double):jsValue;cdecl;
+  TjsBoolean = function(b:boolean):jsValue;cdecl;
+
+  TjsUndefined = function():jsValue;cdecl;
+  TjsNull = function():jsValue;cdecl;
+  TjsTrue = function():jsValue;cdecl;
+  TjsFalse = function():jsValue;cdecl;
+  
+  TjsString = function(es:jsExecState;const str:Putf8):jsValue;
+  TjsStringW = function(es:jsExecState;const str:PWutf8):jsValue;
+  Tjsjsobject = function(es:jsExecState):jsValue;
+  TjsArray = function(es:jsExecState):jsValue;
+
+  TjsFunction = function(es:jsExecState;fn:jsNativeFunction;argCount:Cardinal):jsValue;
+
+//return the window object
+  TjsGlobalobject = function(es:jsExecState):jsValue;
+
+  TjsEval = function(es:jsExecState;const str:Putf8):jsValue;
+  TjsEvalW = function(es:jsExecState;const str:PWutf8):jsValue;
+
+  TjsCall = function(es:jsExecState;func:jsValue;thisjsobject:jsValue;args:PjsValue;argCount:Integer):jsValue;
+  TjsCallGlobal = function(es:jsExecState;func:jsValue;args:PjsValue;argCount:Integer):jsValue;
+
+  TjsGet = function(es:jsExecState;jsobject:jsValue;const prop:Putf8):jsValue;
+  TjsSet = procedure(es:jsExecState;jsobject:jsValue;const prop:Putf8;v:jsValue);
+
+  TjsGetGlobal = function(es:jsExecState;const prop:Putf8):jsValue;
+  TjsSetGlobal = procedure(es:jsExecState;const prop:Putf8;v:jsValue);
+
+  TjsGetAt = function(es:jsExecState;jsobject:jsValue;index:Integer):jsValue;
+  TjsSetAt = procedure(es:jsExecState;jsobject:jsValue;index:Integer;v:jsValue);
+
+  TjsGetLength = function(es:jsExecState;jsobject:jsValue):Integer;
+  TjsSetLength = procedure(es:jsExecState;jsobject:jsValue;length:integer);
+
+  TjsGetWebView = function(es:jsExecState):wkeWebView;
+
+  TjsGC = procedure();//garbage collect
+  
+  
   procedure wke_Init();
-  function  wkeIsTransparent(browser: wkeWebView):Boolean; stdcall; cdecl;
-  procedure wkeSetTransparent(browser: wkeWebView;transparent: Boolean); stdcall; cdecl;
-  function  wkeGetBitmap(const browser: wkeWebView; typ: Integer): TBitmap;
-  procedure wkeInit(); stdcall; cdecl;
-  function  wkeCreateWebView(): wkeWebView; stdcall; cdecl;
-  procedure wkeResize(webView: wkeWebView;w,h: Integer); stdcall; cdecl;
-  procedure wkeLoadURL(webView: wkeWebView;url: Putf8); stdcall; cdecl;
-  procedure wkeUpdate(); stdcall; cdecl;
-  function  wkeVersionString():Putf8; stdcall; cdecl;
-  function  wkeIsLoaded(webView: wkeWebView):Boolean; stdcall; cdecl;
-  //function  wkeIsLoading(webView: wkeWebView):Boolean; cdecl;
-  function  wkeIsDocumentReady(webView: wkeWebView):Boolean; stdcall; cdecl;
-  function  wkeIsLoadComplete(webView: wkeWebView):Boolean; stdcall; cdecl;
-  function  wkeIsLoadFailed(webView: wkeWebView):Boolean; stdcall; cdecl;
-  function  wkeRunJS(webView: wkeWebView;script: Putf8):Boolean; stdcall; cdecl;
-  function  wkeRunJSW(webView: wkeWebView;script: PWutf8):Boolean; stdcall; cdecl;
-  function  wkeContentsWidth(webView: wkeWebView):Integer; stdcall; cdecl;
-  function  wkeContentsHeight(webView: wkeWebView):Integer; stdcall; cdecl;
-  function  wkeWidth(webView: wkeWebView):Integer; stdcall; cdecl;
-  function  wkeHeight(webView: wkeWebView):Integer; stdcall; cdecl;
-  function  wkeTitleW(webView: wkeWebView):PWutf8; stdcall; cdecl;
-  procedure wkePaint(wkeWebView: wkeWebView; bits: Pointer;pitch: Integer); stdcall; cdecl;
-  function  wkeIsDirty(webView: wkeWebView):Boolean; stdcall; cdecl;
-  procedure wkeFocus(webView: wkeWebView); stdcall; cdecl;
-  procedure wkeUnfocus(webView: wkeWebView); stdcall; cdecl;
-  //procedure wkeSetClientHandler(webView:wkeWebView, handler:wkeClientHandler); cdecl;
-  {
-WKE_API bool wkeMouseEvent(wkeWebView webView, unsigned int message, int x, int y, unsigned int flags);
-WKE_API bool wkeContextMenuEvent(wkeWebView webView, int x, int y, unsigned int flags);
-WKE_API bool wkeMouseWheel(wkeWebView webView, int x, int y, int delta, unsigned int flags);
-WKE_API bool wkeKeyUp(wkeWebView webView, unsigned int virtualKeyCode, unsigned int flags, bool systemKey);
-WKE_API bool wkeKeyDown(wkeWebView webView, unsigned int virtualKeyCode, unsigned int flags, bool systemKey);
-WKE_API bool wkeKeyPress(wkeWebView webView, unsigned int charCode, unsigned int flags, bool systemKey);
-  }
-
-  {
-  PCefKeyInfo = ^TCefKeyInfo;
-  TCefKeyInfo = record
-    key: Integer;
-    sysChar: BOOL;
-    imeChar: BOOL;
-  end;
-  }
-  function  wkeMouseEvent(webView: wkeWebView;msg: Integer; x,y:Integer;flags: LongWord):Boolean; stdcall; cdecl;
-  function  wkeContextMenuEvent(webView: wkeWebView;x,y:Integer;flags: LongWord):Boolean; stdcall; cdecl;
-  function  wkeMouseWheel(webView: wkeWebView;x,y:Integer;msg: Integer; flags: LongWord):Boolean; stdcall; cdecl;
-
-  function  wkeKeyUp   (webView: wkeWebView;virtualKeyCode: Word;flags: Word;systemKey: Boolean):Boolean;  cdecl;
-  function  wkeKeyDown (webView: wkeWebView;virtualKeyCode: Word;flags: Word;systemKey: Boolean):Boolean;  cdecl;
-  function  wkeKeyPress(webView: wkeWebView;      charCode: Word;flags: Word;systemKey: Boolean):Boolean;  cdecl;
-
-  function  wkeGetCaret(webView: wkeWebView):wkeRect; stdcall; cdecl;
-  procedure wkeSetEditable(webView: wkeWebView; editable:Boolean); stdcall; cdecl;
-
-  function  wkeGlobalExec(webView: wkeWebView):jsExecState; stdcall; cdecl;
-  function  wkeToString(str : wkeString):Putf8; stdcall; cdecl;
-
-  procedure jsBindFunction(name:Pchar; fn:jsNativeFunction; argCount:Word); stdcall; cdecl;
-  procedure jsBindGetter(name:Pchar; fn:jsNativeFunction); stdcall; cdecl;
-  procedure jsBindSetter(name:Pchar; fn:jsNativeFunction); stdcall; cdecl;
-  function  jsArgCount(es:jsExecState):Integer; stdcall; cdecl;
-  function  jsArgType(es:jsExecState; argIdx:integer):jsType; stdcall; cdecl;
-  function  jsArg(es:jsExecState;argIdx:Integer):jsValue; stdcall; cdecl;
-
-  function jsTypeOf(v:jsValue):jsType; stdcall; cdecl;
-  function jsIsNumber(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsString(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsBoolean(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsObject(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsFunction(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsUndefined(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsNull(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsArray(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsTrue(v:jsValue):boolean; stdcall; cdecl;
-  function jsIsFalse(v:jsValue):boolean; stdcall; cdecl;
-
+  function  wkeGetBitmap(browser: wkeWebView; typ: Integer): TBitmap; 
+  
 
 var
+  //wkeDllHandle: THandle;
   MBT_LEFT   :LongWord = 0;
   MBT_MIDDLE :LongWord = 1;
   MBT_RIGHT  :LongWord = 2;
@@ -133,66 +182,265 @@ var
   WKE_EXTENDED :LongWord= $0100;
   WKE_REPEAT :LongWord= $000;
   
+  wkeIsTransparent: TwkeIsTransparent;
+  wkeSetTransparent: TwkeSetTransparent;
+  wkeInit: TwkeInit;
+  wkeCreateWebView: TwkeCreateWebView;
+  wkeResize: TwkeResize;
+
+  wkeLoadURL: TwkeLoadURL;
+  wkeLoadURLW: TwkeLoadURLW;
+
+  wkeLoadHTML: TwkeLoadHTML;
+  wkeLoadHTMLW: TwkeLoadHTMLW;
+
+  wkeLoadFile: TwkeLoadFile;
+  wkeLoadFileW: TwkeLoadFileW;
+
+  wkeUpdate: TwkeUpdate;
+  wkeVersionString: TwkeVersionString;
+  wkeIsLoaded: TwkeIsLoaded;
+  
+  wkeIsDocumentReady: TwkeIsDocumentReady;
+  wkeIsLoadComplete: TwkeIsLoadComplete;
+  wkeIsLoadFailed: TwkeIsLoadFailed;
+  wkeRunJS: TwkeRunJS;
+  wkeRunJSW: TwkeRunJSW;
+  wkeContentsWidth: TwkeContentsWidth;
+  wkeContentsHeight: TwkeContentsHeight;
+  wkeWidth: TwkeWidth;
+  wkeHeight: TwkeHeight;
+  wkeTitleW: TwkeTitleW;
+  wkePaint: TwkePaint;
+  wkeIsDirty: TwkeIsDirty;
+  wkeFocus: TwkeFocus;
+  wkeUnfocus: TwkeUnfocus;
+  
+  wkeMouseEvent: TwkeMouseEvent;
+  wkeContextMenuEvent: TwkeContextMenuEvent;
+  wkeMouseWheel: TwkeMouseWheel;
+
+  wkeKeyUp: TwkeKeyUp;
+  wkeKeyDown: TwkeKeyDown;
+  wkeKeyPress: TwkeKeyPress;
+
+  wkeGetCaret: TwkeGetCaret;
+  wkeSetEditable: TwkeSetEditable;
+
+  wkeGlobalExec: TwkeGlobalExec;
+  wkeToString: TwkeToString;
+
+  jsBindFunction: TjsBindFunction;
+  jsBindGetter: TjsBindGetter;
+  jsBindSetter: TjsBindSetter;
+  jsArgCount: TjsArgCount;
+  jsArgType: TjsArgType;
+  jsArg: TjsArg;
+
+  jsTypeOf: TjsTypeOf;
+  jsIsNumber: TjsIsNumber;
+  jsIsString: TjsIsString;
+  jsIsBoolean: TjsIsBoolean;
+  jsIsObject: TjsIsObject;
+  jsIsfunction: TjsIsfunction;
+  jsIsUndefined: TjsIsUndefined;
+  jsIsNull: TjsIsNull;
+  jsIsArray: TjsIsArray;
+  jsIsTrue: TjsIsTrue;
+  jsIsFalse: TjsIsFalse;
+
+  jsToInt: TjsToInt;
+  jsToFloat: TjsToFloat;
+  jsToDouble: TjsToDouble;
+  jsToBoolean: TjsToBoolean;
+  jsToString: TjsToString;
+  jsToStringW: TjsToStringW;
+
+  jsInt: TjsInt;
+  jsFloat: TjsFloat;
+  jsDouble: TjsDouble;
+  jsBoolean: TjsBoolean;
+
+  jsUndefined: TjsUndefined;
+  jsNull: TjsNull;
+  jsTrue: TjsTrue;
+  jsFalse: TjsFalse;
+  
+  jsString: TjsString;
+  jsStringW: TjsStringW;
+  jsjsobject: Tjsjsobject;
+  jsArray: TjsArray;
+
+  jsFunction: TjsFunction;
+
+//return the window object
+  jsGlobalobject: TjsGlobalobject;
+
+  jsEval: TjsEval;
+  jsEvalW: TjsEvalW;
+
+  jsCall: TjsCall;
+  jsCallGlobal: TjsCallGlobal;
+
+  jsGet: TjsGet;
+  jsSet: TjsSet;
+
+  jsGetGlobal: TjsGetGlobal;
+  jsSetGlobal: TjsSetGlobal;
+
+  jsGetAt: TjsGetAt;
+  jsSetAt: TjsSetAt;
+
+  jsGetLength: TjsGetLength;
+  jsSetLength: TjsSetLength;
+
+  jsGetWebView: TjsGetWebView;
+
+  jsGC: TjsGC;
+  
 implementation
-  procedure wkeInit; external 'wke.dll';
-  function  wkeIsTransparent; external 'wke.dll';
-  procedure wkeSetTransparent; external 'wke.dll';
-  function  wkeCreateWebView; external 'wke.dll';
-  procedure wkeResize; external 'wke.dll';
-  procedure wkeLoadURL; external 'wke.dll';
-  procedure wkeUpdate; external 'wke.dll';
-  function  wkeVersionString; external 'wke.dll';
-  function  wkeIsLoaded; external 'wke.dll';         
-  //function  wkeIsLoading; external 'wke.dll';
-  function  wkeIsDocumentReady; external 'wke.dll';
-  function  wkeIsLoadComplete; external 'wke.dll';
-  function  wkeIsLoadFailed; external 'wke.dll';
-  function  wkeRunJS; external 'wke.dll';    
-  function  wkeRunJSW; external 'wke.dll';
-  function  wkeContentsWidth; external 'wke.dll';
-  function  wkeContentsHeight; external 'wke.dll';      
-  function  wkeWidth; external 'wke.dll';
-  function  wkeHeight; external 'wke.dll';
-  function  wkeTitleW; external 'wke.dll';
-  procedure wkePaint; external 'wke.dll';
-  function  wkeIsDirty; external 'wke.dll';
-  procedure wkeFocus; external 'wke.dll';
-  procedure wkeUnfocus; external 'wke.dll'; 
-  function  wkeMouseEvent; external 'wke.dll';
-  function  wkeContextMenuEvent; external 'wke.dll';
-  function  wkeMouseWheel; external 'wke.dll';
-  function  wkeKeyUp; external 'wke.dll';
-  function  wkeKeyDown; external 'wke.dll';
-  function  wkeKeyPress; external 'wke.dll';
-  function  wkeGetCaret; external 'wke.dll';
-  procedure wkeSetEditable; external 'wke.dll';
-  function  wkeGlobalExec; external 'wke.dll';
-  function  wkeToString; external 'wke.dll';
-  procedure jsBindFunction; external 'wke.dll';
-  procedure jsBindGetter; external 'wke.dll';
-  procedure jsBindSetter; external 'wke.dll';
-  function  jsArgCount; external 'wke.dll';
-  function  jsArgType; external 'wke.dll';
-  function  jsTypeOf; external 'wke.dll';
-  function  jsArg; external 'wke.dll';
-  function  jsIsNumber; external 'wke.dll';
-  function  jsIsString; external 'wke.dll';
-  function  jsIsBoolean; external 'wke.dll';
-  function  jsIsObject; external 'wke.dll';
-  function  jsIsFunction; external 'wke.dll';
-  function  jsIsUndefined; external 'wke.dll';
-  function  jsIsNull; external 'wke.dll';
-  function  jsIsArray; external 'wke.dll';
-  function  jsIsTrue; external 'wke.dll';
-  function  jsIsFalse; external 'wke.dll';
 
-  procedure wke_Init();
-  begin
-    Set8087CW(Get8087CW or $3F);
-    wkeInit();
-  end;
+function LoadDllFunc(Funcname:String):Pointer;
+var
+  wkeDllHandle: THandle;
+begin
+   //if wkeDllHandle = 0 then
+	   wkeDllHandle := LoadLibrary(PChar('wke.dll'));
+   if wkeDllHandle <> 0 then { success }
+   begin
+     result := GetProcAddress(wkeDllHandle, PChar(Funcname));
+	   //MessageDlg('Error: could not find exampleDLL.DLL', mtError, [mbOk], 0);
+   end
+   else
+   begin
+     result := nil;
+	 MessageDlg('Error: could not find '+Funcname+' in wke.dll', mtError, [mbOk], 0);
+   end;
+  //FreeLibrary(hDll);
+end;
 
-function wkeGetBitmap(const browser: wkeWebView; typ: Integer): TBitmap;
+procedure wke_Init();
+begin
+  Set8087CW(Get8087CW or $3F);
+
+  wkeIsTransparent := LoadDllFunc('wkeIsTransparent');
+  wkeSetTransparent := LoadDllFunc('wkeSetTransparent');
+  wkeInit := LoadDllFunc('wkeInit');
+  wkeCreateWebView := LoadDllFunc('wkeCreateWebView');
+  wkeResize := LoadDllFunc('wkeResize');
+
+  wkeLoadURL := LoadDllFunc('wkeLoadURL');
+  wkeLoadURLW := LoadDllFunc('wkeLoadURLW');
+  wkeLoadHTML:= LoadDllFunc('wkeLoadHTML');
+  wkeLoadHTMLW:= LoadDllFunc('wkeLoadHTMLW');
+  wkeLoadFile:= LoadDllFunc('wkeLoadFile');
+  wkeLoadFileW:= LoadDllFunc('wkeLoadFileW');
+
+  wkeUpdate := LoadDllFunc('wkeUpdate');
+  wkeVersionString := LoadDllFunc('wkeVersionString');
+  wkeIsLoaded := LoadDllFunc('wkeIsLoaded');
+  
+  wkeIsDocumentReady := LoadDllFunc('wkeIsDocumentReady');
+  wkeIsLoadComplete := LoadDllFunc('wkeIsLoadComplete');
+  wkeIsLoadFailed := LoadDllFunc('wkeIsLoadFailed');
+  wkeRunJS := LoadDllFunc('wkeRunJS');
+  wkeRunJSW := LoadDllFunc('wkeRunJSW');
+  wkeContentsWidth := LoadDllFunc('wkeContentsWidth');
+  wkeContentsHeight := LoadDllFunc('wkeContentsHeight');
+  wkeWidth := LoadDllFunc('wkeWidth');
+  wkeHeight := LoadDllFunc('wkeHeight');
+  wkeTitleW := LoadDllFunc('wkeTitleW');
+  wkePaint := LoadDllFunc('wkePaint');
+  wkeIsDirty := LoadDllFunc('wkeIsDirty');
+  wkeFocus := LoadDllFunc('wkeFocus');
+  wkeUnfocus := LoadDllFunc('wkeUnfocus');
+  
+  wkeMouseEvent := LoadDllFunc('wkeMouseEvent');
+  wkeContextMenuEvent := LoadDllFunc('wkeContextMenuEvent');
+  wkeMouseWheel := LoadDllFunc('wkeMouseWheel');
+
+  wkeKeyUp := LoadDllFunc('wkeKeyUp');
+  wkeKeyDown := LoadDllFunc('wkeKeyDown');
+  wkeKeyPress := LoadDllFunc('wkeKeyPress');
+
+  wkeGetCaret := LoadDllFunc('wkeGetCaret');
+  wkeSetEditable := LoadDllFunc('wkeSetEditable');
+
+  wkeGlobalExec := LoadDllFunc('wkeGlobalExec');
+  wkeToString := LoadDllFunc('wkeToString');
+
+  jsBindFunction := LoadDllFunc('jsBindFunction');
+  jsBindGetter := LoadDllFunc('jsBindGetter');
+  jsBindSetter := LoadDllFunc('jsBindSetter');
+  jsArgCount := LoadDllFunc('jsArgCount');
+  jsArgType := LoadDllFunc('jsArgType');
+  jsArg := LoadDllFunc('jsArg');
+
+  jsTypeOf := LoadDllFunc('jsTypeOf');
+  jsIsNumber := LoadDllFunc('jsIsNumber');
+  jsIsString := LoadDllFunc('jsIsString');
+  jsIsBoolean := LoadDllFunc('jsIsBoolean');
+  jsIsObject := LoadDllFunc('jsIsObject');
+  jsIsfunction := LoadDllFunc('jsIsfunction');
+  jsIsUndefined := LoadDllFunc('jsIsUndefined');
+  jsIsNull := LoadDllFunc('jsIsNull');
+  jsIsArray := LoadDllFunc('jsIsArray');
+  jsIsTrue := LoadDllFunc('jsIsTrue');
+  jsIsFalse := LoadDllFunc('jsIsFalse');
+
+  jsToInt := LoadDllFunc('jsToInt');
+  jsToFloat := LoadDllFunc('jsToFloat');
+  jsToDouble := LoadDllFunc('jsToDouble');
+  jsToBoolean := LoadDllFunc('jsToBoolean');
+  jsToString := LoadDllFunc('jsToString');
+  jsToStringW := LoadDllFunc('jsToStringW');
+
+  jsInt := LoadDllFunc('jsInt');
+  jsFloat := LoadDllFunc('jsFloat');
+  jsDouble := LoadDllFunc('jsDouble');
+  jsBoolean := LoadDllFunc('jsBoolean');
+
+  jsUndefined := LoadDllFunc('jsUndefined');
+  jsNull := LoadDllFunc('jsNull');
+  jsTrue := LoadDllFunc('jsTrue');
+  jsFalse := LoadDllFunc('jsFalse');
+  
+  jsString := LoadDllFunc('jsString');
+  jsStringW := LoadDllFunc('jsStringW');
+  jsjsobject := LoadDllFunc('jsjsobject');
+  jsArray := LoadDllFunc('jsArray');
+
+  jsFunction := LoadDllFunc('jsFunction');
+
+//return the window object
+  jsGlobalobject := LoadDllFunc('jsGlobalobject');
+
+  jsEval := LoadDllFunc('jsEval');
+  jsEvalW := LoadDllFunc('jsEvalW');
+
+  jsCall := LoadDllFunc('jsCall');
+  jsCallGlobal := LoadDllFunc('jsCallGlobal');
+
+  jsGet := LoadDllFunc('jsGet');
+  jsSet := LoadDllFunc('jsSet');
+
+  jsGetGlobal := LoadDllFunc('jsGetGlobal');
+  jsSetGlobal := LoadDllFunc('jsSetGlobal');
+
+  jsGetAt := LoadDllFunc('jsGetAt');
+  jsSetAt := LoadDllFunc('jsSetAt');
+
+  jsGetLength := LoadDllFunc('jsGetLength');
+  jsSetLength := LoadDllFunc('jsSetLength');
+
+  jsGetWebView := LoadDllFunc('jsGetWebView');
+
+  jsGC := LoadDllFunc('jsGC');
+  
+  wkeInit();
+end;
+
+function wkeGetBitmap(browser: wkeWebView; typ: Integer): TBitmap;
 var
   w, h, i: Integer;
   p, s: Pointer;
